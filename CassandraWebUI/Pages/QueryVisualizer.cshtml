@@ -1,0 +1,401 @@
+﻿@page "/connections/{id:Guid}"
+
+@model CassandraWebUI.Pages.QueryVisualizerModel
+
+@{
+}
+
+<div class="query-main-block">
+    <div class="query-settings-block">
+        <div class="query-settings-inner-block">
+            <div class="query-manipulation-block">
+                <div class="margin-left-sm">
+                    <button id="backBtn" class="back-button" role="button"><i class="fa fa-arrow-left"></i> Back</button>
+                </div>
+                <div class="margin-right-sm">
+                    <button id="queryLoadBtn" class="load-query-btn" type="button" data-toggle="popover">Load Query</button>
+                </div>
+            </div>
+            <div class="query-settings-select-panel">
+                <nav class="visualization-options">
+                    <span id="visualTab" class="active">Visual</span>
+                    <span id="codeTab">Code</span>
+                </nav>
+            </div>
+            <div id="queryPanel" class="query-settings-build-panel">
+                <div id="visualPanel">
+                    <div id="newFromBlock" class="query-settings-build-panel__item align-center">
+                        <button class="query-settings-build-panel__button" type="button" id="newQueryBtn" data-toggle="popover">Start new query</button>
+                    </div>
+                    <div id="editFromBlock" class="query-settings-build-panel__item hidden">
+                        <div class="edit-delete-options__single">
+                            <span class="edit-delete-options__span">
+                                <span onclick="emptyFromStep()" class="cursor-pointer small-margin-between"><i class="fa fa-trash-o edit-delete-options__icon"></i></span>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div id="newSelectBlock" class="query-settings-build-panel__item align-center hidden">
+                        <button class="query-settings-build-panel__button" type="button" onclick="showSelectModal()">Restrict / Rename columns</button>
+                    </div>
+                    <div id="editSelectBlock" class="query-settings-build-panel__item hidden">
+                        <div class="edit-delete-options">
+                            <span class="edit-delete-options__span">
+                                <span onclick="editSelectStep()" class="cursor-pointer small-margin-between"><i class="fa fa-pencil edit-delete-options__icon"></i></span>
+                                <span onclick="emptySelectStep()" class="cursor-pointer margin-right-sm"><i class="fa fa-trash-o edit-delete-options__icon"></i></span>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div id="newFilterBlock" class="query-settings-build-panel__item align-center hidden">
+                        <button class="query-settings-build-panel__button" type="button" onclick="showFilterModal()">Add Filters</button>
+                    </div>
+                    <div id="editFilterBlock" class="query-settings-build-panel__item hidden">
+                        <div class="edit-delete-options">
+                            <span class="edit-delete-options__span">
+                                <span onclick="editFilterStep()" class="cursor-pointer small-margin-between"><i class="fa fa-pencil edit-delete-options__icon"></i></span>
+                                <span onclick="emptyFilterStep()" class="cursor-pointer margin-right-sm"><i class="fa fa-trash-o edit-delete-options__icon"></i></span>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div id="newGroupBlock" class="query-settings-build-panel__item align-center hidden">
+                        <button class="query-settings-build-panel__button" type="button" onclick="showGroupModal()">Summarize</button>
+                    </div>
+                    <div id="editGroupBlock" class="query-settings-build-panel__item hidden">
+                        <div class="edit-delete-options">
+                            <span class="edit-delete-options__span">
+                                <span onclick="editGroupStep()" class="cursor-pointer small-margin-between"><i class="fa fa-pencil edit-delete-options__icon"></i></span>
+                                <span onclick="emptyGroupStep()" class="cursor-pointer margin-right-sm"><i class="fa fa-trash-o edit-delete-options__icon"></i></span>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div id="newSortBlock" class="query-settings-build-panel__item align-center hidden">
+                        <button class="query-settings-build-panel__button" type="button" onclick="showSortModal()">Add Sorters</button>
+                    </div>
+                    <div id="editSortBlock" class="query-settings-build-panel__item hidden">
+                        <div class="edit-delete-options">
+                            <span class="edit-delete-options__span">
+                                <span onclick="editSortStep()" class="cursor-pointer small-margin-between"><i class="fa fa-pencil edit-delete-options__icon"></i></span>
+                                <span onclick="emptySortStep()" class="cursor-pointer margin-right-sm"><i class="fa fa-trash-o edit-delete-options__icon"></i></span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hidden" id="codePanel">
+                    <div id="newCodeBlock" class="query-settings-build-panel__item align-center">
+                        <button class="query-settings-build-panel__button" type="button" onclick="showCodeModal()">Type NoSQL</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="query-result-block">
+        <div class="query-result-header display-flex">
+            <div id="queryResultShowMenu" class="data-result-show hidden">
+                <div class="data-result-show__menu">
+                    <span id="showTableOption" class="small-margin-between data-result-show__option cursor-pointer active" onclick="showTable()"><i class="fa fa-table"></i></span>
+                    <span id="showBarChartOption" class="small-margin-between data-result-show__option cursor-pointer" onclick="prepareBarDiagram()"><i class="fa fa-bar-chart"></i></span>
+                    <span id="showHorizontalBarChartOption" class="small-margin-between data-result-show__option cursor-pointer" onclick="prepareHorizontalBarDiagram()"><i class="fa fa-bar-chart horizontal"></i></span>
+                    <span id="showPieChartOption" class="small-margin-between data-result-show__option cursor-pointer" onclick="preparePieDiagram()"><i class="fa fa-pie-chart"></i></span>
+                    <span id="showPolarChartOption" class="small-margin-between data-result-show__option cursor-pointer" onclick="preparePolarDiagram()"><i class="fa fa-asterisk"></i></span>
+                    <span id="showDoughnutChartOption" class="small-margin-between data-result-show__option cursor-pointer" onclick="prepareDoughnutDiagram()"><i class="fa fa-circle-o-notch"></i></span>
+                </div>
+            </div>
+            <div id="queryDownloadBlock" class="query-download-block hidden small-margin-between">
+                <button onclick="downloadQueryResult()" class="btn btn-outline-secondary"><i class="fa fa-download"></i></button>
+            </div>
+            <div id="querySaveBlock" class="query-save-block hidden">
+                <button onclick="openSaveQueryModal()" class="btn btn-outline-secondary"><i class="fa fa-save"></i> Save Query</button>
+            </div>
+        </div>
+        <div id="mainPageAlert" class="query-result-error hidden">
+            <div class="new-message-box">
+                <div class="new-message-box-danger">
+                    <div class="info-tab tip-icon-danger" title="error"><i></i></div>
+                    <div class="tip-box-danger">
+                        <p id="mainPageAlertText" class="small-margin-bottom"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="query-result-table__block">
+            <div class="main-notification-block" id="startQueryingNotification">
+                <div class="notif-alert notif-alert-info">
+                    <div class="icon pull-left notif-alert-icon">
+                        <i class="fa fa-info fa-2x"></i>
+                    </div>
+                    <div class="copy">
+                        <h4>Information</h4>
+                        <p class="no-margin-bottom">Start creating new query using visualization tools or code panel.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="query-result-table hidden" id="queryResultTable"></div>
+            <div class="query-chart hidden" id="queryResultChartBlock">
+                <div class="form-row align-items-center display-flex">
+                    <div class="col-auto small-margin-between">
+                        <select id="labelSelectDiagram" class="width-auto form-select mb-2" aria-label="Labels"></select>
+                    </div>
+                    <div class="col-auto small-margin-between">
+                        <select id="valueSelectDiagram" class="width-auto form-select mb-2" aria-label="Values"></select>
+                    </div>
+                    <div class="col-auto small-margin-between">
+                        <button id="buildChartBtn" onclick="buildChart()" chart-type="" type="submit" class="btn btn-secondary mb-2">Build diagram</button>
+                    </div>
+                </div>
+                <canvas id="queryResultChart" class="chart-properties"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div id="sortModal" class="modal" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Sorters</h5>
+            </div>
+            <div class="modal-body">
+                <div id="sortErrorAlert" class="query-result-error hidden">
+                    <div class="new-message-box-modal">
+                        <div class="new-message-box-danger">
+                            <div class="info-tab tip-icon-danger" title="error"><i></i></div>
+                            <div class="tip-box-danger">
+                                <p id="sortErrorAlertText" class="small-margin-bottom"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="display-flex">
+                    <span class="small-margin-between span-vertical-align">Sort by </span>
+                    <select id="sortSelectField" class="width-auto form-select small-margin-between" aria-label="Sort picker">
+                    </select>
+                    <button id="addSortOptionBtn" class="small-margin-between btn btn-outline-danger" onclick="addSortOption()">Add</button>
+                </div>
+                <div class="small-margin-top">
+                    <ul id="sortSteps" class="modal-list list-group"></ul>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="sortAddBtn" onclick="addSortStep()" type="button" class="btn btn-primary">Set</button>
+                <button onclick="closeSortModal()" type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="filterModal" class="modal" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Filters</h5>
+            </div>
+            <div class="modal-body">
+                <div id="filterErrorAlert" class="query-result-error hidden">
+                    <div class="new-message-box-modal">
+                        <div class="new-message-box-danger">
+                            <div class="info-tab tip-icon-danger" title="error"><i></i></div>
+                            <div class="tip-box-danger">
+                                <p id="filterErrorAlertText" class="small-margin-bottom"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="display-flex">
+                    <span class="small-margin-between span-vertical-align">Filter by </span>
+                    <select id="filterColumnSelectField" class="width-auto form-select small-margin-between" aria-label="Filter picker"></select>
+                    <select id="filterOperandSelectField" class="width-auto form-select small-margin-between" aria-label="Filter picker"></select>
+                    <input class="small-margin-between width-auto form-control" id="filterValue" />
+
+                    <div class="in-option-block-width small-margin-between align-items-center width-auto input-group hidden" id="inValues">
+                        <input class="form-control in-value" />
+                        <input class="form-control in-value" />
+                        <input class="form-control in-value" />
+                    </div>
+
+                    <button class="small-margin-between btn btn-outline-danger" id="addFilterOptionBtn" onclick="addFilterOption()">Add</button>
+                </div>
+                <div class="small-margin-top">
+                    <ul id="filterSteps" class="modal-list list-group"></ul>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="addFilterBtn" onclick="addFilterStep()" type="button" class="btn btn-primary disabled">Set</button>
+                <button onclick="closeFilterModal()" type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="groupModal" class="modal" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Functions</h5>
+            </div>
+            <div class="modal-body">
+                <div id="groupErrorAlert" class="query-result-error hidden">
+                    <div class="new-message-box-modal">
+                        <div class="new-message-box-danger">
+                            <div class="info-tab tip-icon-danger" title="error"><i></i></div>
+                            <div class="tip-box-danger">
+                                <p id="groupErrorAlertText" class="small-margin-bottom"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="display-flex small-margin-bottom">
+                    <span class="small-margin-between span-vertical-align">Find </span>
+                    <select id="groupFunctionSelectField" class="width-auto form-select small-margin-between" aria-label="Group function">
+                    </select>
+                    <select id="groupMainColumnSelectField" class="width-auto form-select small-margin-between" aria-label="Group main column">
+                    </select>
+                </div>
+                <div class="display-flex">
+                    <span class="small-margin-between span-vertical-align">By </span>
+                    <select id="groupSecondaryColumnSelectField" class="width-auto form-select small-margin-between" aria-label="Group secondary column">
+                    </select>
+                    <button class="small-margin-between btn btn-outline-danger" id="addGroupSecondaryOptionBtn" onclick="addGroupOptionBtn()">Add</button>
+                </div>
+                <div class="small-margin-top">
+                    <ul id="groupSecondaryOptions" class="modal-list list-group"></ul>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button onclick="addGroupStep()" type="button" class="btn btn-primary">Set</button>
+                <button onclick="closeGroupModal()" type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="selectModal" class="modal" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Restrict and rename</h5>
+            </div>
+            <div class="modal-body">
+                <div id="selectErrorAlert" class="query-result-error hidden">
+                    <div class="new-message-box-modal">
+                        <div class="new-message-box-danger">
+                            <div class="info-tab tip-icon-danger" title="error"><i></i></div>
+                            <div class="tip-box-danger">
+                                <p id="selectErrorAlertText" class="small-margin-bottom"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="small-margin-top">
+                    <ul id="selectOptionsList" class="modal-list list-group"></ul>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="addSelectBtn" onclick="addSelectStep()" type="button" class="btn btn-primary">Set</button>
+                <button onclick="closeSelectModal()" type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="codeModal" class="modal" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Type NoSQL code</h5>
+            </div>
+            <div class="modal-body">
+                <div id="codeErrorAlert" class="query-result-error hidden">
+                    <div class="new-message-box-modal">
+                        <div class="new-message-box-danger">
+                            <div class="info-tab tip-icon-danger" title="error"><i></i></div>
+                            <div class="tip-box-danger">
+                                <p id="codeErrorAlertText" class="small-margin-bottom"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="small-margin-top">
+                    <textarea id="nosqlCode" class="form-control" aria-label="With textarea" rows="4" maxlength="5000" placeholder="Start typing..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="addCodeBtn" onclick="executeCode()" type="button" class="btn btn-primary">Execute</button>
+                <button onclick="closeCodeModal()" type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="saveQueryModal" class="modal" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Save Query</h5>
+            </div>
+            <div class="modal-body">
+                <div id="saveQueryAlert" class="query-result-error hidden">
+                    <div class="new-message-box-modal">
+                        <div class="new-message-box-danger">
+                            <div class="info-tab tip-icon-danger" title="error"><i></i></div>
+                            <div class="tip-box-danger">
+                                <p id="saveQueryAlertText" class="small-margin-bottom"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <button onclick="downloadQuery()" class="btn btn-secondary"><i class="fa fa-download"></i> Download Query</button>
+                </div>
+
+                <div class="input-group mb-3 small-margin-top">
+                    <div class="input-group-prepend input-group-prepend__modal">
+                        <span class="input-group-text">Query title</span>
+                    </div>
+                    <input type="email" class="form-control" id="queryTitle" aria-describedby="queryName" placeholder="Query Name">
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button onclick="saveQuery()" type="button" class="btn btn-primary">Save</button>
+                <button onclick="closeSaveQueryModal()" type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts{
+    <script>
+        var connectionData = {
+            name: "@Html.Raw(Model.storage.name)",
+            hosts: "@Html.Raw(Model.storage.hosts)",
+            username: "@Html.Raw(Model.storage.username)",
+            password: "@Html.Raw(Model.storage.password)",
+            keyspace: "@Html.Raw(Model.storage.keyspace)",
+        };
+
+        var udfs = @Html.Raw(Model.jsonUdfs);
+    </script>
+
+    <script src="~/js/constants.js"></script>
+    <script src="~/js/helpers.js"></script>
+
+    <script src="~/js/query.js"></script>
+    <script src="~/js/codePanel.js"></script>
+
+    <script src="~/js/mainPanel.js"></script>
+    <script src="~/js/chart.js"></script>
+
+    <script src="~/js/queryManipulation.js"></script>
+
+    <script src="~/js/from.js"></script>
+    <script src="~/js/select.js"></script>
+    <script src="~/js/filtering.js"></script>
+    <script src="~/js/grouping.js"></script>
+    <script src="~/js/sorting.js"></script>
+}
